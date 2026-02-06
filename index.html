@@ -18,7 +18,7 @@
             background: white;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 320px;
             text-align: center;
         }
@@ -31,7 +31,7 @@
             color: #666;
             font-size: 14px;
         }
-        .deposit-section {
+        .deposit-section, .group-section {
             margin-top: 20px;
             padding: 20px;
             border-radius: 0.5rem;
@@ -51,11 +51,30 @@
             border: none;
             border-radius: 0.5rem;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .submit-button:hover {
+            background-color: #0056b3;
         }
         .success-message {
             color: #28a745;
             margin-top: 10px;
             display: none;
+        }
+        .group-owner {
+            color: #fff;
+            background-color: #28a745;
+            padding: 10px;
+            border-radius: 0.5rem;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .color-picker {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 0.5rem;
+            width: 100%;
         }
     </style>
 </head>
@@ -71,8 +90,18 @@
         <button class="submit-button" onclick="simulateDeposit()">Einzahlung abschicken</button>
         <div id="successMessage" class="success-message">Einzahlung erfolgreich!</div>
     </div>
-</div>
 
+    <div class="group-section">
+        <label class="label" for="groupName">Gruppenname:</label>
+        <input type="text" id="groupName" class="input-field" placeholder="Gruppenname eingeben" />
+        
+        <label class="label" for="groupColor">Gruppenfarbe:</label>
+        <input type="color" id="groupColor" class="color-picker" />
+
+        <button class="submit-button" onclick="createGroup()">Gruppe erstellen</button>
+        <div id="groupOwnerMessage" class="group-owner" style="display:none;">Du bist der Gruppenbesitzer!</div>
+    </div>
+</div>
 <script>
     function simulateDeposit() {
         const depositAmount = document.getElementById('depositAmount').value;
@@ -80,6 +109,18 @@
             document.getElementById('successMessage').style.display = 'block';
         } else {
             alert('Bitte einen gültigen Betrag eingeben.');
+        }
+    }
+
+    function createGroup() {
+        const groupName = document.getElementById('groupName').value;
+        const groupColor = document.getElementById('groupColor').value;
+        if (groupName) {
+            document.getElementById('groupOwnerMessage').style.display = 'block';
+            alert(`Gruppe "${groupName}" mit der Farbe ${groupColor} erstellt!`);
+            // Here, you can implement additional logic to manage group ownership rights
+        } else {
+            alert('Bitte einen gültigen Gruppennamen eingeben.');
         }
     }
 </script>
