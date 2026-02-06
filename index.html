@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Wallet Dashboard - Fake Deposit</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 320px;
+            text-align: center;
+        }
+        .balance {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .label {
+            color: #666;
+            font-size: 14px;
+        }
+        .deposit-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+        }
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+        .submit-button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="label">Demo Kontostand</div>
+    <div class="balance">2.000,00 €</div>
+    <div class="label">Nur zu Übungszwecken</div>
+    
+    <div class="deposit-section">
+        <label class="label" for="depositAmount">Einzahlungsbetrag:</label>
+        <input type="number" id="depositAmount" class="input-field" placeholder="Betrag hier eingeben" />
+        <button class="submit-button" onclick="simulateDeposit()">Einzahlung abschicken</button>
+        <div id="successMessage" class="success-message">Einzahlung erfolgreich!</div>
+    </div>
+</div>
+
+<script>
+    function simulateDeposit() {
+        const depositAmount = document.getElementById('depositAmount').value;
+        if (depositAmount) {
+            document.getElementById('successMessage').style.display = 'block';
+        } else {
+            alert('Bitte einen gültigen Betrag eingeben.');
+        }
+    }
+</script>
+</body>
+</html>
