@@ -3,126 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Wallet Dashboard - Fake Deposit</title>
+    <title>Sentinel Protocol | Secure Wallet v3.2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0c;
+            color: #e2e8f0;
         }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 320px;
-            text-align: center;
+        .mono { font-family: 'JetBrains+Mono', monospace; }
+        .glass {
+            background: rgba(22, 22, 26, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .balance {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 20px 0;
+        .owner-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .label {
-            color: #666;
-            font-size: 14px;
-        }
-        .deposit-section, .group-section {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 0.5rem;
-            background-color: #f8f9fa;
-        }
-        .input-field {
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 0.5rem;
-            width: 100%;
-        }
-        .submit-button {
-            background-color: #007BFF;
+        .tab-active {
+            background: #1e293b;
             color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        .submit-button:hover {
-            background-color: #0056b3;
-        }
-        .success-message {
-            color: #28a745;
-            margin-top: 10px;
-            display: none;
-        }
-        .group-owner {
-            color: #fff;
-            background-color: #28a745;
-            padding: 10px;
-            border-radius: 0.5rem;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        .color-picker {
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 0.5rem;
-            width: 100%;
-        }
+        input::placeholder { color: #475569; }
     </style>
 </head>
-<body>
-<div class="card">
-    <div class="label">Demo Kontostand</div>
-    <div class="balance">2.000,00 €</div>
-    <div class="label">Nur zu Übungszwecken</div>
-    
-    <div class="deposit-section">
-        <label class="label" for="depositAmount">Einzahlungsbetrag:</label>
-        <input type="number" id="depositAmount" class="input-field" placeholder="Betrag hier eingeben" />
-        <button class="submit-button" onclick="simulateDeposit()">Einzahlung abschicken</button>
-        <div id="successMessage" class="success-message">Einzahlung erfolgreich!</div>
+<body class="min-h-screen flex flex-col">
+    <div id="app" class="flex-grow">
+        <!-- AUTH VIEW -->
+        <div id="auth-view" class="min-h-screen flex items-center justify-center p-4">
+            <div class="w-full max-w-md glass p-8 rounded-2xl shadow-2xl">
+                <div class="flex flex-col items-center mb-8">
+                    <div class="p-3 bg-blue-600/20 rounded-xl border border-blue-500/30 mb-4">
+                        <i data-lucide="shield" class="text-blue-400 w-8 h-8"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight">Sentinel Protocol</h1>
+                    <p class="text-slate-400 text-sm">Secure Access Management</p>
+                </div>
+                <!-- Tabs -->
+                <div class="flex bg-slate-900 p-1 rounded-lg mb-6">
+                    <button id="tab-login-btn" onclick="showTab('login')" class="flex-1 py-2 rounded-md text-xs font-medium transition-all tab-active">Login</button>
+                    <button id="tab-reset-btn" onclick="showTab('reset')" class="flex-1 py-2 rounded-md text-xs font-medium transition-all text-slate-400 hover:text-white">Passwort Reset</button>
+                </div>
+                <!-- Login Form -->
+                <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Username</label>
+                        <input type="text" id="login-user" required placeholder="z.B. KayGaming" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 px-4 focus:outline-none focus:border-blue-500 transition-all text-sm">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Passwort</label>
+                        <input type="password" id="login-pass" required placeholder="••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 px-4 focus:outline-none focus:border-blue-500 transition-all text-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i> Einloggen
+                    </button>
+                </form>
+                <!-- Reset Form -->
+                <form id="reset-form" onsubmit="handleReset(event)" class="hidden space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Username</label>
+                        <input type="text" id="reset-user" required placeholder="Ihr Username" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 px-4 focus:outline-none focus:border-blue-500 transition-all text-sm">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Altes Passwort</label>
+                        <input type="password" id="reset-old-pass" required placeholder="Aktueller Key" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 px-4 focus:outline-none focus:border-blue-500 transition-all text-sm">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs uppercase tracking-wider text-slate-500 font-semibold">Neues Passwort</label>
+                        <input type="password" id="reset-new-pass" required placeholder="Neuer Key" class="w-full bg-slate-950 border border-slate-800 rounded-lg py-3 px-4 focus:outline-none focus:border-blue-500 transition-all text-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Passwort aktualisieren
+                    </button>
+                </form>
+                <div id="status-msg" class="mt-4 text-center text-xs hidden"></div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard-view" class="hidden flex flex-col min-h-screen">
+            <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md px-6 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2 font-bold text-lg"><i data-lucide="shield" class="text-blue-500"></i> SENTINEL</div>
+                <div class="flex items-center gap-4">
+                    <span id="user-display" class="hidden md:block text-xs font-semibold text-blue-400"></span>
+                    <button onclick="handleLogout()" class="text-slate-400 hover:text-white flex items-center gap-2 text-sm">
+                        <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                    </button>
+                </div>
+            </nav>
+            <main class="max-w-7xl mx-auto p-6 w-full space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass p-6 rounded-2xl border-l-4 border-l-blue-500">
+                        <span class="text-slate-500 text-xs uppercase font-bold">Wallet Guthaben</span>
+                        <div class="text-2xl font-bold mt-1 text-white">2.410,00 STN</div>
+                    </div>
+                    <div class="md:col-span-2 glass p-6 rounded-2xl">
+                        <h3 class="text-sm font-bold text-slate-400 mb-2">Public Protocol Hash</h3>
+                        <div id="user-hash-display" class="mono text-xs text-blue-400 break-all bg-black/40 p-2 rounded border border-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- Gruppen Sektion -->
+                <div class="glass rounded-2xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 bg-slate-900/20">
+                        <h3 class="font-bold text-sm uppercase tracking-widest text-slate-400">Zugeordnete Gruppen</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-900 text-slate-500 text-[10px] uppercase font-bold">
+                                <tr>
+                                    <th class="px-6 py-4">Name</th>
+                                    <th class="px-6 py-4">Owner</th>
+                                    <th class="px-6 py-4">Zugriffs-Key (Privat)</th>
+                                    <th class="px-6 py-4 text-right">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="group-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ADMIN SEKTION (Nur für KayGaming) -->
+                <div id="admin-section" class="hidden space-y-4">
+                    <div class="flex items-center gap-2 text-emerald-400 mt-8 mb-2">
+                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        <h3 class="font-bold uppercase text-sm tracking-widest">Master Admin-Panel</h3>
+                    </div>
+                    <div class="glass rounded-2xl overflow-hidden border border-emerald-500/20">
+                        <div class="p-6 border-b border-slate-800 bg-emerald-500/5">
+                            <p class="text-xs text-slate-400 font-medium">Nutzer-Datenbank & Passwort-Management</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-black/40 text-slate-500 text-[10px] uppercase font-bold">
+                                    <tr>
+                                        <th class="px-6 py-4">Nutzer</th>
+                                        <th class="px-6 py-4">Aktuelles Passwort</th>
+                                        <th class="px-6 py-4 text-right">Aktion</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-user-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
-    <div class="group-section">
-        <label class="label" for="groupName">Gruppenname:</label>
-        <input type="text" id="groupName" class="input-field" placeholder="Gruppenname eingeben" />
-        
-        <label class="label" for="groupColor">Gruppenfarbe:</label>
-        <input type="color" id="groupColor" class="color-picker" />
+    <script>
+        // --- Speicher ---
+        let userData = {
+            "KayGaming": { password: "9874", hash: "kay-master-hash", role: "owner" },
+            "TestUser": { password: "1234", hash: "usr-02-alpha", role: "member" },
+            "Moderator": { password: "5555", hash: "mod-99-beta", role: "member" }
+        };
 
-        <button class="submit-button" onclick="createGroup()">Gruppe erstellen</button>
-        <div id="groupOwnerMessage" class="group-owner" style="display:none;">Du bist der Gruppenbesitzer!</div>
-    </div>
-</div>
-<script>
-    function simulateDeposit() {
-        const depositAmount = document.getElementById('depositAmount').value;
-        if (depositAmount) {
-            document.getElementById('successMessage').style.display = 'block';
-        } else {
-            alert('Bitte einen gültigen Betrag eingeben.');
-        }
-    }
+        let groups = [
+            { id: 1, name: "Alpha Security", ownerName: "System", ownerHash: "sys-01" },
+            { id: 2, name: "Elite Raiders", ownerName: "KayGaming", ownerHash: "kay-master-hash" },
+            { id: 3, name: "Shadow Node", ownerName: "KayGaming", ownerHash: "kay-master-hash" }
+        ];
 
-    function createGroup() {
-        const groupName = document.getElementById('groupName').value;
-        const groupColor = document.getElementById('groupColor').value;
-        if (groupName) {
-            document.getElementById('groupOwnerMessage').style.display = 'block';
-            alert(`Gruppe "${groupName}" mit der Farbe ${groupColor} erstellt!`);
-            // Here, you can implement additional logic to manage group ownership rights
-        } else {
-            alert('Bitte einen gültigen Gruppennamen eingeben.');
+        let currentUser = null;
+        let editingUser = null; // Track welcher User gerade editiert wird
+
+        // --- Navigation ---
+        function showTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const resetForm = document.getElementById('reset-form');
+            const loginBtn = document.getElementById('tab-login-btn');
+            const resetBtn = document.getElementById('tab-reset-btn');
+            document.getElementById('status-msg').classList.add('hidden');
+            
+            if(tab === 'login') {
+                loginForm.classList.remove('hidden');
+                resetForm.classList.add('hidden');
+                loginBtn.classList.add('tab-active');
+                resetBtn.classList.remove('tab-active');
+            } else {
+                loginForm.classList.add('hidden');
+                resetForm.classList.remove('hidden');
+                resetBtn.classList.add('tab-active');
+                loginBtn.classList.remove('tab-active');
+            }
         }
-    }
-</script>
+
+        // --- Authentifizierung ---
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const statusMsg = document.getElementById('status-msg');
+
+            if (userData[user] && userData[user].password === pass) {
+                currentUser = { name: user, hash: userData[user].hash, role: userData[user].role };
+                render();
+            } else {
+                statusMsg.innerText = "Fehler: Login fehlgeschlagen.";
+                statusMsg.className = "mt-4 text-center text-xs text-red-400 block";
+                statusMsg.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            editingUser = null;
+            render();
+        }
+
+        function handleReset(e) {
+            e.preventDefault();
+            const user = document.getElementById('reset-user').value;
+            const oldPass = document.getElementById('reset-old-pass').value;
+            const newPass = document.getElementById('reset-new-pass').value;
+            const statusMsg = document.getElementById('status-msg');
+
+            if (userData[user] && userData[user].password === oldPass) {
+                userData[user].password = newPass;
+                statusMsg.innerText = "Passwort erfolgreich geändert!";
+                statusMsg.className = "mt-4 text-center text-xs text-emerald-400 block";
+                statusMsg.classList.remove('hidden');
+                setTimeout(() => showTab('login'), 1500);
+            } else {
+                statusMsg.innerText = "Fehler: Altes Passwort inkorrekt.";
+                statusMsg.className = "mt-4 text-center text-xs text-red-400 block";
+                statusMsg.classList.remove('hidden');
+            }
+        }
+
+        // --- Admin Funktionen ---
+        window.startEdit = function(userName) {
+            editingUser = userName;
+            render();
+        };
+
+        window.cancelEdit = function() {
+            editingUser = null;
+            render();
+        };
+
+        window.saveNewPassword = function(userName) {
+            const inputField = document.getElementById(`new-pass-input-${userName}`);
+            const newPassword = inputField.value;
+            
+            if (newPassword && newPassword.trim() !== "") {
+                userData[userName].password = newPassword;
+                editingUser = null;
+                render();
+                // Optionaler Erfolgshinweis
+                console.log(`System: Passwort für ${userName} wurde überschrieben.`);
+            } else {
+                alert("Bitte geben Sie ein gültiges Passwort ein.");
+            }
+        };
+
+        // --- Rendering ---
+        function render() {
+            const authView = document.getElementById('auth-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            const adminSection = document.getElementById('admin-section');
+
+            if (currentUser) {
+                authView.classList.add('hidden');
+                dashboardView.classList.remove('hidden');
+                document.getElementById('user-display').innerText = currentUser.name;
+                document.getElementById('user-hash-display').innerText = currentUser.hash;
+
+                // Gruppen Liste
+                const list = document.getElementById('group-list');
+                list.innerHTML = '';
+                groups.forEach(g => {
+                    const isOwner = g.ownerHash === currentUser.hash;
+                    list.innerHTML += `
+                        <tr class="border-b border-slate-800/50 hover:bg-white/5 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-200">${g.name}</td>
+                            <td class="px-6 py-4 text-slate-400 text-xs">${g.ownerName}</td>
+                            <td class="px-6 py-4 mono text-[11px]">
+                                ${isOwner 
+                                    ? `<span class="px-2 py-1 rounded owner-badge font-bold italic text-[10px]">OWNER-KEY: ${userData[currentUser.name].password}</span>` 
+                                    : `<span class="text-slate-700">••••••••••••••••</span>`
+                                }
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                ${isOwner 
+                                    ? '<span class="text-blue-400 text-[10px] font-bold uppercase">Administrator</span>' 
+                                    : '<span class="text-slate-600 text-[10px] uppercase">Mitglied</span>'
+                                }
+                            </td>
+                        </tr>`;
+                });
+
+                // Admin Panel (Nur für KayGaming)
+                if (currentUser.name === "KayGaming") {
+                    adminSection.classList.remove('hidden');
+                    const adminList = document.getElementById('admin-user-list');
+                    adminList.innerHTML = '';
+                    
+                    Object.keys(userData).forEach(uName => {
+                        if(uName === currentUser.name) return; // KayGaming sich selbst nicht in der Liste zeigen
+
+                        if (editingUser === uName) {
+                            // Bearbeitungs-Modus Zeile
+                            adminList.innerHTML += `
+                                <tr class="bg-blue-600/10 border-b border-blue-500/30">
+                                    <td class="px-6 py-4 font-bold text-white">${uName}</td>
+                                    <td class="px-6 py-4">
+                                        <input type="text" id="new-pass-input-${uName}" placeholder="Neuer Key..." class="bg-black border border-blue-500 rounded px-2 py-1 text-xs mono w-full focus:outline-none text-blue-400">
+                                    </td>
+                                    <td class="px-6 py-4 text-right space-x-2">
+                                        <button onclick="saveNewPassword('${uName}')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-3 py-1 rounded font-bold uppercase tracking-tight">Speichern</button>
+                                        <button onclick="cancelEdit()" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-3 py-1 rounded font-bold uppercase tracking-tight">X</button>
+                                    </td>
+                                </tr>`;
+                        } else {
+                            // Standard Zeile
+                            adminList.innerHTML += `
+                                <tr class="border-b border-slate-800/50 hover:bg-white/5">
+                                    <td class="px-6 py-4 font-semibold text-slate-300">${uName}</td>
+                                    <td class="px-6 py-4 mono text-xs text-slate-500">${userData[uName].password}</td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button onclick="startEdit('${uName}')" class="text-emerald-400 hover:text-emerald-300 text-[10px] font-bold uppercase border border-emerald-500/20 px-3 py-1 rounded bg-emerald-500/5 transition-all">
+                                            Key Ändern
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        }
+                    });
+                } else {
+                    adminSection.classList.add('hidden');
+                }
+            } else {
+                authView.classList.remove('hidden');
+                dashboardView.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        window.onload = () => lucide.createIcons();
+    </script>
 </body>
 </html>
